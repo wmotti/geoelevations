@@ -1,5 +1,5 @@
 require 'tempfile'
-require 'zip/zip'
+require 'zip'
 require 'zlib'
 
 module GeoElevation
@@ -23,9 +23,10 @@ module GeoElevation
 
         def self.unzip(zip_source, file_name)
             temp_file = Tempfile::new(file_name)
+            temp_file.binmode
             temp_file.write(zip_source)
             temp_file.rewind
-            Zip::ZipFile.open(temp_file) do |zip_file|
+            Zip::File.open(temp_file) do |zip_file|
               zip_file.each do |f|
                 next unless "#{f}" == file_name
                 return f.get_input_stream.read
