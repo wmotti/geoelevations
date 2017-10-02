@@ -15,9 +15,10 @@ module GeoElevation
     #EGM2008_URL   = 'http://localhost/Und_min2.5x2.5_egm2008_isw=82_WGS84_TideFree_SE.gz'
 
     class Srtm
-        def initialize
+        def initialize(srtm_dir=DIR_NAME)
             # Just in case...
-            json = Retriever::prepare_folder
+            @dir_name = srtm_dir
+            json = Retriever::prepare_folder srtm_dir
             # Dictionary with all files and urls (as is saved in ~/.elevations.rb/list.json)
             @files = JSON.load(json)
             @cached_srtm_files = {}
@@ -93,7 +94,7 @@ module GeoElevation
             end
 
             file_name = file.sub('.zip', '')
-            local_file_name = File.join(GeoElevation::DIR_NAME, file_name)
+            local_file_name = File.join(@dir_name, file_name)
             if ! File.exist?(local_file_name)
                 puts "Retrieving #{file_name} because #{local_file_name} not found"
                 file_contents = open(url).read
@@ -112,7 +113,7 @@ module GeoElevation
             for candidate_file_name in @files[srtm_version].keys
                 if candidate_file_name.index(file_name) == 0
                     return [candidate_file_name, "#{GeoElevation::SRTM_BASE_URL}#{@files[srtm_version][candidate_file_name]}"]
-                end 
+                end
             end
 
             nil
@@ -130,7 +131,7 @@ module GeoElevation
 
             "#{north_south}#{lat}#{east_west}#{lon}.hgt"
         end
-    end
+     end
 
     class SrtmFile
         def initialize(local_file_name)
@@ -142,7 +143,7 @@ module GeoElevation
             if @square_side != @square_side.to_i
                 raise "Invalid file size #{size}"
             end
-            
+
             parse_file_name_starting_position()
         end
 
@@ -204,23 +205,23 @@ module GeoElevation
         end
     end
 
-    # EGM stands for "Earth Gravitational Model" and is a parser for the 
-    # EGM2008 file obtained from 
+    # EGM stands for "Earth Gravitational Model" and is a parser for the
+    # EGM2008 file obtained from
     # http://earth-info.nga.mil/GandG/wgs84/gravitymod/egm2008/index.html
     class Undulations
-        def initialize
+        def initialize(dir_name=DIR_NAME)
             # Just in case...
-            json = Retriever::prepare_folder
+            json = Retriever::prepare_folder dir_name
 
             @file_name = GeoElevation::EGM2008_URL.split('/')[-1]
-            @local_file_name = File.join(GeoElevation::DIR_NAME, @file_name.gsub(/.gz$/, ''))
+            @local_file_name = File.join(dir_name, @file_name.gsub(/.gz$/, ''))
 
             if !File.exists?(@local_file_name)
                 puts "Downloading and ungzipping #{GeoElevation::EGM2008_URL}"
                 GeoElevation::Utils::ungzip(open(GeoElevation::EGM2008_URL), @local_file_name)
             end
 
-            # EGM files will not be loaded in memory because they are too big. 
+            # EGM files will not be loaded in memory because they are too big.
             # file.seek will be used to read values.
 
             file_size = File.size?(@local_file_name)
@@ -251,7 +252,7 @@ module GeoElevation
             get_value_at_file_position(position)
         end
 
-        # Loads a value from the n-th position in the EGM file. Every position 
+        # Loads a value from the n-th position in the EGM file. Every position
         # is a 4-byte real number.
         def get_value_at_file_position(position)
             @file.seek(4 + position * 4)
@@ -273,7 +274,7 @@ module GeoElevation
             exponent = (n >> (32 - 9)) & 0b11111111
             value = n & 0b11111111111111111111111
 
-            resul = nil
+            result = nil
             if 1 <= exponent and exponent <= 254
                 result = (-1)**sign * (1 + value * 2**(-23)) * 2**(exponent - 127)
             elsif exponent == 0

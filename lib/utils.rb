@@ -65,12 +65,12 @@ module GeoElevation
     module Retriever
         MAX_DEPTH = 3
 
-        def self.prepare_folder
-            srtm_urls_file = File.join(GeoElevation::DIR_NAME, 'list.json')
+        def self.prepare_folder(dir_name=GeoElevation::DIR_NAME)
+            srtm_urls_file = File.join(dir_name, 'list.json')
             json = nil
 
-            if ! File.directory?(GeoElevation::DIR_NAME)
-                Dir.mkdir(GeoElevation::DIR_NAME)
+            if ! File.directory?(dir_name)
+                Dir.mkdir(dir_name)
             end
             if ! File.exist?(srtm_urls_file)
                 json = self::get_json()
