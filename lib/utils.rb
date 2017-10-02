@@ -4,6 +4,9 @@ require 'zlib'
 
 module GeoElevation
     module Utils
+
+        ONE_DEGREE = 1000. * 10000.8 / 90.0
+
         def self.get_common_string_start(urls)
             if ! urls
                 return nil
@@ -19,6 +22,15 @@ module GeoElevation
             end
 
             result
+        end
+
+        # Distance between two points.
+        def self.distance(latitude_1, longitude_1, latitude_2, longitude_2)
+          coef = Math.cos(latitude_1 / 180.0 * Math::PI)
+          x = latitude_1 - latitude_2
+          y = (longitude_1 - longitude_2) * coef
+
+          Math.sqrt(x * x + y * y) * ONE_DEGREE
         end
 
         def self.unzip(zip_source, file_name)

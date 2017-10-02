@@ -23,14 +23,57 @@ module GeoElevation
             @cached_srtm_files = {}
         end
 
-        def get_elevation(latitude, longitude)
-            srtm_file = get_file(latitude, longitude)
+        # If approximate is True then only the points from SRTM grid will be
+        # used, otherwise a basic aproximation of nearby points will be calculated.
+        def get_elevation(latitude, longitude, approximate=false)
+            if approximate
+                get_approximation(latitude, longitude)
+            else
+                srtm_file = get_file(latitude, longitude)
+                srtm_file.get_elevation(latitude, longitude)
+            end
+        end
 
-            if not srtm_file
-                return nil
+        def get_approximation(latitude, longitude)
+            srtm_file = get_file(latitude, longitude)
+            return nil if srtm_file.nil?
+
+            # TODO(MG) manage discrepancies between SRTM1 and SRTM3
+            # ATM this will be more inaccurate at the seams
+            d = 1.0 / srtm_file.square_side
+            d_meters = d * GeoElevation::Utils::ONE_DEGREE
+
+            # Since the less the distance => the more important should be the
+            # distance of the point, we'll use d-distance as importance coef here:
+            importance_1 = d_meters - GeoElevation::Utils::distance(latitude + d, longitude, latitude, longitude)
+            elevation_1  = get_elevation(latitude + d, longitude, approximate=false)
+
+            importance_2 = d_meters - GeoElevation::Utils::distance(latitude - d, longitude, latitude, longitude)
+            elevation_2  = get_elevation(latitude - d, longitude, approximate=false)
+
+            importance_3 = d_meters - GeoElevation::Utils::distance(latitude, longitude + d, latitude, longitude)
+            elevation_3  = get_elevation(latitude, longitude + d, approximate=false)
+
+            importance_4 = d_meters - GeoElevation::Utils::distance(latitude, longitude - d, latitude, longitude)
+            elevation_4  = get_elevation(latitude, longitude - d, approximate=false)
+
+            if elevation_1.nil? || elevation_2.nil? || elevation_3.nil? || elevation_4.nil?
+                elevation = self.get_elevation(latitude, longitude, approximate=false)
+                return nil if elevation.nil?
+                elevation_1 ||= elevation
+                elevation_2 ||= elevation
+                elevation_3 ||= elevation
+                elevation_4 ||= elevation
             end
 
-            srtm_file.get_elevation(latitude, longitude)
+            # Normalize importance:
+            sum_importances = importance_1 + importance_2 + importance_3 + importance_4
+
+            # TODO(MG) this does not factor in the actual elevation from the (lat, lon) sample
+            return importance_1 / sum_importances * elevation_1 +
+                 importance_2 / sum_importances * elevation_2 +
+                 importance_3 / sum_importances * elevation_3 +
+                 importance_4 / sum_importances * elevation_4
         end
 
         def get_file(latitude, longitude)
@@ -123,8 +166,6 @@ module GeoElevation
             [ ((@latitude + 1 - latitude) * (@square_side - 1).to_f).floor, ((longitude - @longitude) * (@square_side - 1).to_f).floor ]
         end
 
-        # If approximate is True then only the points from SRTM grid will be 
-        # used, otherwise a basic aproximation of nearby points will be calculated.
         def get_elevation(latitude, longitude)
             if ! (@latitude <= latitude && latitude < @latitude + 1)
                 raise "Invalid latitude #{latitude} for file #{@file_name}"
@@ -134,9 +175,6 @@ module GeoElevation
             end
 
             row, column = get_row_and_column(latitude, longitude)
-
-            #points = self.square_side ** 2
-
             get_elevation_from_row_and_column(row.to_i, column.to_i)
         end
 
@@ -153,12 +191,16 @@ module GeoElevation
 
             result = byte_1 * 256 + byte_2
 
-            if result > 9000
+            if result > 9000 || result < -9000
                 # TODO(TK) try to detect the elevation from neighbour point:
                 return nil
             end
 
             result
+        end
+
+        def square_side
+            @square_side
         end
     end
 
