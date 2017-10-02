@@ -10,6 +10,6 @@ Gem::Specification.new do |s|
   s.homepage    = 'https://github.com/tkrajina/geoelevations'
   s.license     = 'Apache2.0'
 
-  s.add_runtime_dependency 'zip-zip'
+  s.add_runtime_dependency 'rubyzip'
   s.add_runtime_dependency 'rmagick'
 end
