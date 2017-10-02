@@ -12,7 +12,7 @@ Geoelevation.rb allows you to retrieve the **elevation** for any point in Earth 
 
 Example usage:
 
-    require 'elevation'
+    require 'geoelevation'
 
     srtm = GeoElevations::Srtm.new
     elevation = srtm.get_elevation(45.276, 13.72)
@@ -42,7 +42,7 @@ When you record a GPS track with a smartphone sometimes the elevation graph will
 
 ![GPX elevations](http://tkrajina.github.io/srtm.py/gpx_elevations.png)
 
-The **black** line is the elevation data from a Samsung smartphone, the red line is the data obtained from SRTM. 
+The **black** line is the elevation data from a Samsung smartphone, the red line is the data obtained from SRTM.
 
 The first 700 meters of the track is obviously a measurement error (common for smartphones), but the rest of the track is recorded cca 40 meters above the actual elevation.
 
@@ -58,15 +58,15 @@ In black are part of the world above the ideal (WGS84) ellipsoid, in white below
 
 Example library usage:
 
-    require 'elevation'
+    require 'geoelevation'
 
     egm = GeoElevations::Undulations.new
     undulation = egm.get_undulation(45.276, 13.72)
-    puts "The ideal WGS ellipsoid is #{undulation} above the actual geoid" 
+    puts "The ideal WGS ellipsoid is #{undulation} above the actual geoid"
 
 The result is:
 
-    The ideal WGS ellipsoid is 45.049991607666016 above the actual geoid 
+    The ideal WGS ellipsoid is 45.049991607666016 above the actual geoid
 
 ..and this is the actual error between the actual SRTM elevations and the GPS recordings from smartphones and GPSes without the EGM undulations database.
 
