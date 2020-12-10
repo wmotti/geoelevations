@@ -133,7 +133,7 @@ module GeoElevation
 
             "#{north_south}#{lat}#{east_west}#{lon}.hgt"
         end
-     end
+    end
 
     class SrtmFile
         def initialize(local_file_name)
@@ -212,9 +212,6 @@ module GeoElevation
     # http://earth-info.nga.mil/GandG/wgs84/gravitymod/egm2008/index.html
     class Undulations
         def initialize(dir_name=DIR_NAME)
-            # Just in case...
-            json = Retriever::prepare_folder dir_name
-
             @file_name = GeoElevation::EGM2008_URL.split('/')[-1]
             @local_file_name = File.join(dir_name, @file_name.gsub(/.gz$/, ''))
 

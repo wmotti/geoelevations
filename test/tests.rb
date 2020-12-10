@@ -26,7 +26,7 @@ class TestSimpleNumber < Test::Unit::TestCase
         file_name = srtm.get_file_name(43, 13)
         file_name, url = srtm.find_file_name_and_url(file_name, 'srtm3')
         assert_equal('N43E013.hgt.zip', file_name)
-        assert_equal('http://dds.cr.usgs.gov/srtm/version2_1/SRTM3/Eurasia/N43E013.hgt.zip', url)
+        assert_equal('https://dds.cr.usgs.gov/srtm/version2_1/SRTM3/Eurasia/N43E013.hgt.zip', url)
     end
 
     def test_nonexisting_srtm_file_urls

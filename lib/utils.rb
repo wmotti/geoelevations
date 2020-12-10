@@ -91,8 +91,6 @@ module GeoElevation
         end
 
         def self.get_json()
-            result = {'srtm1' => {}, 'srtm3' => {}}
-
             srtm_1_urls = self.retrieve("#{GeoElevation::SRTM_BASE_URL}/#{GeoElevation::SRTM1_URL}")
             srtm_3_urls = self.retrieve("#{GeoElevation::SRTM_BASE_URL}/#{GeoElevation::SRTM3_URL}")
 
@@ -104,7 +102,7 @@ module GeoElevation
 
         def self.retrieve(base_url)
             result = []
-            self.retrieve_urls(result, base_url, depth=1)
+            self.retrieve_urls(result, base_url, 1)
         end
 
         def self.retrieve_urls(result, base_url, depth=1)
@@ -113,11 +111,11 @@ module GeoElevation
                 return
             end
             contents = open(base_url) { |io| io.read }
-            for url in contents.scan /href="([^\/][^"']+)/
+            for url in contents.scan(/href="([^\/][^"']+)/)
                 url = url[0]
                 if url[-1] == '/'
                     self.retrieve_urls(result, "#{base_url}/#{url}", depth + 1)
-                elsif url.match /^.*\.hgt\.zip$/
+                elsif url.match(/^.*\.hgt\.zip$/)
                     file_url = "#{base_url}/#{url}"
                     puts "Found #{file_url}"
                     result.push(file_url)
