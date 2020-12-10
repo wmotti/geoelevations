@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name        = 'geoelevation'
-  s.version     = '0.0.2'
-  s.date        = '2017-10-02'
+  s.version     = '0.0.3'
+  s.date        = '2020-12-10'
   s.summary     = "Geoelevation.rb is a SRTM and EGM2008 undulations parser library for Ruby."
   s.description = "Geoelevation.rb allows you to retrieve elevation for any point on Earth (if present in the SRTM dataset) and the undulation value (the difference between the WGS84 ellipsoid and the actual Earth size)."
   s.authors     = ["Tomo Krajina"]

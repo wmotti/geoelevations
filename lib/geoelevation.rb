@@ -5,7 +5,7 @@ require_relative 'utils'
 
 module GeoElevation
 
-    SRTM_BASE_URL = 'http://dds.cr.usgs.gov/srtm'
+    SRTM_BASE_URL = 'https://dds.cr.usgs.gov/srtm'
     SRTM1_URL     = '/version2_1/SRTM1/'
     SRTM3_URL     = '/version2_1/SRTM3/'
     DIR_NAME      = "#{Dir.home}/.elevations.rb"
@@ -216,7 +216,7 @@ module GeoElevation
             @file_name = GeoElevation::EGM2008_URL.split('/')[-1]
             @local_file_name = File.join(dir_name, @file_name.gsub(/.gz$/, ''))
 
-            if !File.exists?(@local_file_name)
+            if !File.exist?(@local_file_name)
                 puts "Downloading and ungzipping #{GeoElevation::EGM2008_URL}"
                 GeoElevation::Utils::ungzip(open(GeoElevation::EGM2008_URL), @local_file_name)
             end
