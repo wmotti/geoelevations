@@ -9,19 +9,21 @@ module GeoElevation
     SRTM1_URL     = '/version2_1/SRTM1/'
     SRTM3_URL     = '/version2_1/SRTM3/'
     DIR_NAME      = "#{Dir.home}/.elevations.rb"
+    DEFAULT_TIMEOUT = 15
 
     EGM2008_URL   = 'http://earth-info.nga.mil/GandG/wgs84/gravitymod/egm2008/Small_Endian/Und_min1x1_egm2008_isw=82_WGS84_TideFree_SE.gz'
     # Test:
     #EGM2008_URL   = 'http://localhost/Und_min2.5x2.5_egm2008_isw=82_WGS84_TideFree_SE.gz'
 
     class Srtm
-        def initialize(srtm_dir=DIR_NAME)
+        def initialize(srtm_dir=DIR_NAME, timeout: DEFAULT_TIMEOUT)
             # Just in case...
             @dir_name = srtm_dir
             json = Retriever::prepare_folder srtm_dir
             # Dictionary with all files and urls (as is saved in ~/.elevations.rb/list.json)
             @files = JSON.load(json)
             @cached_srtm_files = {}
+            @timeout = timeout
         end
 
         # If approximate is True then only the points from SRTM grid will be
@@ -97,7 +99,7 @@ module GeoElevation
             local_file_name = File.join(@dir_name, file_name)
             if ! File.exist?(local_file_name)
                 puts "Retrieving #{file_name} because #{local_file_name} not found"
-                file_contents = open(url).read
+                file_contents = open(url, read_timeout: @timeout, open_timeout: @timeout).read
                 file_contents = GeoElevation::Utils::unzip(file_contents, file_name)
                 open(local_file_name, 'wb').write(file_contents)
             end
