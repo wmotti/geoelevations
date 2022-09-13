@@ -43,25 +43,21 @@ module GeoElevation
 
             # TODO(MG) manage discrepancies between SRTM1 and SRTM3
             # ATM this will be more inaccurate at the seams
-            d = 1.0 / srtm_file.square_side
-            d_meters = d * GeoElevation::Utils::ONE_DEGREE
+            d = 1.0 / (srtm_file.square_side - 1)
 
             # Since the less the distance => the more important should be the
-            # distance of the point, we'll use d-distance as importance coef here:
-            importance_1 = d_meters - GeoElevation::Utils::distance(latitude + d, longitude, latitude, longitude)
-            elevation_1  = get_elevation(latitude + d, longitude, approximate=false)
+            # distance of the point, we'll use d-distance as importance coef
+            # here:
+            lat_d = (latitude / d) % 1
+            lon_d = (longitude / d) % 1
 
-            importance_2 = d_meters - GeoElevation::Utils::distance(latitude - d, longitude, latitude, longitude)
-            elevation_2  = get_elevation(latitude - d, longitude, approximate=false)
-
-            importance_3 = d_meters - GeoElevation::Utils::distance(latitude, longitude + d, latitude, longitude)
-            elevation_3  = get_elevation(latitude, longitude + d, approximate=false)
-
-            importance_4 = d_meters - GeoElevation::Utils::distance(latitude, longitude - d, latitude, longitude)
-            elevation_4  = get_elevation(latitude, longitude - d, approximate=false)
+            elevation_1 = get_elevation(latitude, longitude, false)
+            elevation_2 = get_elevation(latitude + d, longitude, false)
+            elevation_3 = get_elevation(latitude, longitude + d, false)
+            elevation_4 = get_elevation(latitude + d, longitude + d, false)
 
             if elevation_1.nil? || elevation_2.nil? || elevation_3.nil? || elevation_4.nil?
-                elevation = self.get_elevation(latitude, longitude, approximate=false)
+                elevation = self.get_elevation(latitude, longitude, false)
                 return nil if elevation.nil?
                 elevation_1 ||= elevation
                 elevation_2 ||= elevation
@@ -69,14 +65,10 @@ module GeoElevation
                 elevation_4 ||= elevation
             end
 
-            # Normalize importance:
-            sum_importances = importance_1 + importance_2 + importance_3 + importance_4
-
-            # TODO(MG) this does not factor in the actual elevation from the (lat, lon) sample
-            return importance_1 / sum_importances * elevation_1 +
-                 importance_2 / sum_importances * elevation_2 +
-                 importance_3 / sum_importances * elevation_3 +
-                 importance_4 / sum_importances * elevation_4
+            return (1. - lat_d) * (1. - lon_d) * elevation_1 +
+              lat_d * (1. - lon_d) * elevation_2 +
+              (1. - lat_d) * lon_d * elevation_3 +
+              lat_d * lon_d * elevation_4
         end
 
         def get_file(latitude, longitude)
