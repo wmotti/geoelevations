@@ -52,9 +52,9 @@ module GeoElevation
             lon_d = (longitude / d) % 1
 
             elevation_1 = get_elevation(latitude, longitude, false)
-            elevation_2 = get_elevation(latitude + d, longitude, false)
+            elevation_2 = get_elevation(latitude - d, longitude, false)
             elevation_3 = get_elevation(latitude, longitude + d, false)
-            elevation_4 = get_elevation(latitude + d, longitude + d, false)
+            elevation_4 = get_elevation(latitude - d, longitude + d, false)
 
             if elevation_1.nil? || elevation_2.nil? || elevation_3.nil? || elevation_4.nil?
                 elevation = self.get_elevation(latitude, longitude, false)
@@ -65,10 +65,10 @@ module GeoElevation
                 elevation_4 ||= elevation
             end
 
-            return (1. - lat_d) * (1. - lon_d) * elevation_1 +
-              lat_d * (1. - lon_d) * elevation_2 +
-              (1. - lat_d) * lon_d * elevation_3 +
-              lat_d * lon_d * elevation_4
+            return lat_d * (1. - lon_d) * elevation_1 +
+              (1. - lat_d) * (1. - lon_d) * elevation_2 +
+              lat_d * lon_d * elevation_3 +
+              (1. - lat_d) * lon_d * elevation_4
         end
 
         def get_file(latitude, longitude)
