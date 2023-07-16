@@ -11,5 +11,5 @@ Gem::Specification.new do |s|
   s.license     = 'Apache2.0'
 
   s.add_runtime_dependency 'rubyzip'
-  s.add_runtime_dependency 'rmagick'
+  s.add_runtime_dependency 'chunky_png'
 end

@@ -1,15 +1,17 @@
 #!/usr/bin/ruby -Ilib
 
+require 'bundler/setup'
+require 'byebug'
 require 'images'
 
 def save_image(image, file_name)
-    image.write(file_name)
+    image.save(file_name)
     puts "Saved #{file_name}"
 end
 
 image = GeoElevation::elevation_image(400, 400, [45, 46], [13, 14], 300)
 save_image(image, 'istra.png')
-#istra.display
+#image.display
 
 miami = [25.787676, -80.224145]
 image = GeoElevation::elevation_image(400, 400, [miami[0] - 1, miami[0] + 1.5], [miami[1] - 2, miami[1] + 0.5], 40)

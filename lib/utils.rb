@@ -110,13 +110,13 @@ module GeoElevation
             if depth > self::MAX_DEPTH
                 return
             end
-            contents = open(base_url) { |io| io.read }
+            contents = URI::open(base_url) { |io| io.read }
             for url in contents.scan(/href="([^\/][^"']+)/)
                 url = url[0]
-                if url[-1] == '/'
+                if url.end_with?('/index.html') && url != '../index.html'
                     self.retrieve_urls(result, "#{base_url}/#{url}", depth + 1)
                 elsif url.match(/^.*\.hgt\.zip$/)
-                    file_url = "#{base_url}/#{url}"
+                    file_url = "#{base_url.gsub('/index.html', '')}/#{url}"
                     puts "Found #{file_url}"
                     result.push(file_url)
                 end

@@ -1,17 +1,19 @@
 require 'json'
+require 'byebug'
 require 'open-uri'
 
 require_relative 'utils'
 
 module GeoElevation
 
-    SRTM_BASE_URL = 'https://dds.cr.usgs.gov/srtm'
-    SRTM1_URL     = '/version2_1/SRTM1/'
-    SRTM3_URL     = '/version2_1/SRTM3/'
+    SRTM_BASE_URL = 'https://srtm.kurviger.de'
+    SRTM1_URL     = 'SRTM1/'
+    SRTM3_URL     = 'SRTM3/'
     DIR_NAME      = "#{Dir.home}/.elevations.rb"
     DEFAULT_TIMEOUT = 15
 
-    EGM2008_URL   = 'http://earth-info.nga.mil/GandG/wgs84/gravitymod/egm2008/Small_Endian/Und_min1x1_egm2008_isw=82_WGS84_TideFree_SE.gz'
+    #EGM2008_URL   = 'http://earth-info.nga.mil/GandG/wgs84/gravitymod/egm2008/Small_Endian/Und_min1x1_egm2008_isw=82_WGS84_TideFree_SE.gz'
+    EGM2008_URL   = 'http://earth-info.nga.mil/GandG/wgs84/gravitymod/egm2008/Small_Endian/Und_min2.5x2.5_egm2008_isw=82_WGS84_TideFree_SE.gz'
     # Test:
     #EGM2008_URL   = 'http://localhost/Und_min2.5x2.5_egm2008_isw=82_WGS84_TideFree_SE.gz'
 
@@ -84,6 +86,7 @@ module GeoElevation
             end
             if ! file && ! url
                 @cached_srtm_files[file_name] = nil
+                byebug
                 return nil
             end
 
@@ -91,7 +94,7 @@ module GeoElevation
             local_file_name = File.join(@dir_name, file_name)
             if ! File.exist?(local_file_name)
                 puts "Retrieving #{file_name} because #{local_file_name} not found"
-                file_contents = open(url, read_timeout: @timeout, open_timeout: @timeout).read
+                file_contents = URI::open(url, read_timeout: @timeout, open_timeout: @timeout).read
                 file_contents = GeoElevation::Utils::unzip(file_contents, file_name)
                 open(local_file_name, 'wb').write(file_contents)
             end
@@ -209,7 +212,7 @@ module GeoElevation
 
             if !File.exist?(@local_file_name)
                 puts "Downloading and ungzipping #{GeoElevation::EGM2008_URL}"
-                GeoElevation::Utils::ungzip(open(GeoElevation::EGM2008_URL), @local_file_name)
+                GeoElevation::Utils::ungzip(URI::open(GeoElevation::EGM2008_URL), @local_file_name)
             end
 
             # EGM files will not be loaded in memory because they are too big.
@@ -218,7 +221,7 @@ module GeoElevation
             file_size = File.size?(@local_file_name)
 
             lines = Math.sqrt(file_size / 2)
-            puts "lines: #{lines}"
+            #puts "lines: #{lines}"
             lines == lines.to_i or raise "Invalid file size:#{file_size}"
 
             @rows = 180 * 24 * 2

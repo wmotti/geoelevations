@@ -1,8 +1,8 @@
 require 'rubygems'
-require 'test/unit'
+require 'minitest/autorun'
 require 'geoelevation'
 
-class TestSimpleNumber < Test::Unit::TestCase
+class TestSimpleNumber < Minitest::Test
  
     def test_get_srtm_file_names
         srtm = GeoElevation::Srtm.new
@@ -26,7 +26,7 @@ class TestSimpleNumber < Test::Unit::TestCase
         file_name = srtm.get_file_name(43, 13)
         file_name, url = srtm.find_file_name_and_url(file_name, 'srtm3')
         assert_equal('N43E013.hgt.zip', file_name)
-        assert_equal('https://dds.cr.usgs.gov/srtm/version2_1/SRTM3/Eurasia/N43E013.hgt.zip', url)
+        assert_equal('https://srtm.kurviger.de/SRTM3/Eurasia/N43E013.hgt.zip', url)
     end
 
     def test_nonexisting_srtm_file_urls
